@@ -7,9 +7,10 @@ class SocialMedia:
 
     def generate_post(self, topic):
         prompt = f"Write a social media post about {topic}."
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
-            max_tokens=100
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # Usa 'model' invece di 'engine'
+            messages=[{"role": "user", "content": prompt}],  # Usa 'messages' per il contenuto
+            max_tokens=100,
+            temperature=0.7
         )
-        return response.choices[0].text.strip()
+        return response['choices'][0]['message']['content'].strip()  # Accesso al contenuto della risposta

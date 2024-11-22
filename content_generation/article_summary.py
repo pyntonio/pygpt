@@ -7,9 +7,10 @@ class ArticleSummary:
 
     def summarize_article(self, article):
         prompt = f"Summarize the following article: {article}"
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
-            max_tokens=150
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # Usa 'model' al posto di 'engine'
+            messages=[{"role": "user", "content": prompt}],  # 'messages' è il formato corretto
+            max_tokens=150,
+            temperature=0.7
         )
-        return response.choices[0].text.strip()
+        return response['choices'][0]['message']['content'].strip()  # Accesso al contenuto della risposta

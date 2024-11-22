@@ -7,7 +7,7 @@ openai.api_key = api_key
 def chat_with_gpt(prompt, model="gpt-3.5-turbo"):
     try:
         # Metodo corretto
-        response = openai.ChatCompletion.create(
+        response = openai.ChatChatCompletion.create(
             model=model,
             messages=[
                 {"role": "user", "content": prompt}

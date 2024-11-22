@@ -1,4 +1,3 @@
-# app.py
 from fastapi import FastAPI
 from assistants.personal_assistant import PersonalAssistant
 from customer_support.automated_chat import AutomatedChat
@@ -6,14 +5,23 @@ from content_generation.social_media import SocialMedia
 from psychological_support.motivation import Motivation
 from business_tools.decision_support import DecisionSupport
 from education_tools.lesson_plans import LessonPlans
+from assistants.language_assistant import LanguageAssistant
+from assistants.writing_assistant import WritingAssistant
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+# Configurazione della chiave API centralizzata
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
+# Inizializza gli assistenti passando la chiave API
 assistant = PersonalAssistant()
-writing_assistant = WritingAssistant("your-openai-api-key")
-language_assistant = LanguageAssistant("your-openai-api-key")
-chat_assistant = AutomatedChat("your-openai-api-key")
-social_media = SocialMedia("your-openai-api-key")
+writing_assistant = WritingAssistant(OPENAI_API_KEY)
+language_assistant = LanguageAssistant(OPENAI_API_KEY)
+chat_assistant = AutomatedChat(OPENAI_API_KEY)
+social_media = SocialMedia(OPENAI_API_KEY)
 motivation = Motivation()
 decision_support = DecisionSupport()
 lesson_plans = LessonPlans()

@@ -145,7 +145,7 @@ Ecco una panoramica di come potresti sviluppare ogni modulo:
 
 #### **2.1 Assistente Virtuale Personale**
 - **Obiettivo**: Creare un modulo che consenta all'utente di impostare promemoria, creare to-do list, scrivere e inviare email.
-- **Tecnologie**: Uso di `openai.ChatCompletion` per rispondere a domande e gestire promemoria. Integrazione con librerie come `schedule` per la gestione dei promemoria.
+- **Tecnologie**: Uso di `openai.ChatChatCompletion` per rispondere a domande e gestire promemoria. Integrazione con librerie come `schedule` per la gestione dei promemoria.
 
 #### **2.2 Scrittura Creativa**
 - **Obiettivo**: Un modulo che aiuti gli utenti a scrivere storie, generare trame, migliorare testi o creare dialoghi.

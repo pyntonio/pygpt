@@ -7,9 +7,10 @@ class LanguageAssistant:
 
     def translate_text(self, text, target_language):
         prompt = f"Translate the following text to {target_language}: {text}"
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
-            max_tokens=100
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # Usa 'model' al posto di 'engine'
+            messages=[{"role": "user", "content": prompt}],  # 'messages' è il formato corretto
+            max_tokens=100,
+            temperature=0.7
         )
-        return response.choices[0].text.strip()
+        return response['choices'][0]['message']['content'].strip()  # Accesso al contenuto della risposta
