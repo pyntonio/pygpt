@@ -10,16 +10,19 @@ from assistants.writing_assistant import WritingAssistant
 from image_tools.image_generation import ImageGenerator
 from image_tools.image_upload import ImageUploader
 from image_tools.image_editing import ImageEditor
+from image_tools.inpainting import Inpainting
+from image_tools.creative_composition import CreativeComposition
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-# Configurazione della chiave API centralizzata
+
+# Carica la chiave API
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-# Inizializza gli assistenti passando la chiave API
+# Inizializza gli assistenti
 assistant = PersonalAssistant()
 writing_assistant = WritingAssistant(OPENAI_API_KEY)
 language_assistant = LanguageAssistant(OPENAI_API_KEY)
@@ -33,6 +36,8 @@ lesson_plans = LessonPlans()
 image_generator = ImageGenerator(OPENAI_API_KEY)
 image_uploader = ImageUploader()
 image_editor = ImageEditor()
+inpainting = Inpainting(OPENAI_API_KEY)
+creative_composition = CreativeComposition(OPENAI_API_KEY)
 
 @app.get("/tasks")
 def get_tasks():
@@ -74,27 +79,20 @@ def create_lesson_plan(subject: str, topic: str, duration: int):
 
 @app.post("/images/generate")
 async def generate_image(prompt: str, size: str = "1024x1024"):
-    """
-    Genera un'immagine basata su un prompt testuale.
-    :param prompt: La descrizione dell'immagine.
-    :param size: Dimensioni dell'immagine (es. "256x256", "512x512").
-    """
     return await image_generator.generate_image(prompt, size)
 
 @app.post("/images/upload")
 async def upload_image(file: UploadFile = File(...)):
-    """
-    Carica un'immagine fornita dall'utente.
-    :param file: Il file immagine caricato.
-    """
     return await image_uploader.upload_image(file)
 
 @app.post("/images/edit")
 async def edit_image(file_path: str, operation: str, params: dict = {}):
-    """
-    Modifica un'immagine esistente.
-    :param file_path: Percorso dell'immagine da modificare.
-    :param operation: Tipo di modifica da applicare (es. "resize", "rotate").
-    :param params: Parametri per l'operazione (es. nuova dimensione).
-    """
     return await image_editor.edit_image(file_path, operation, **params)
+
+@app.post("/inpaint_image")
+def inpaint_image_endpoint(image_url: str, mask_url: str, description: str):
+    return inpainting.inpaint_image(image_url, mask_url, description)
+
+@app.post("/creative_composition")
+def creative_composition_endpoint(description: str):
+    return creative_composition.create_creative_composition(description)
