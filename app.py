@@ -1,4 +1,5 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Query
+from fastapi.responses import FileResponse
 from assistants.personal_assistant import PersonalAssistant
 from customer_support.automated_chat import AutomatedChat
 from content_generation.article_summary import ArticleSummary
@@ -7,6 +8,8 @@ from psychological_support.motivation import Motivation
 from psychological_support.mindfulness import MindfulnessAssistant
 from business_tools.decision_support import DecisionSupport
 from business_tools.data_analysis import DataAnalysis
+from business_tools.stock_analysis import StockAnalysis
+from business_tools.portfolio_generator import PortfolioGenerator
 from education_tools.lesson_plans import LessonPlans
 from assistants.language_assistant import LanguageAssistant
 from assistants.writing_assistant import WritingAssistant
@@ -36,6 +39,8 @@ motivation = Motivation(OPENAI_API_KEY)
 mindfulness = MindfulnessAssistant(OPENAI_API_KEY)
 decision_support = DecisionSupport(OPENAI_API_KEY)
 data_analysis = DataAnalysis(OPENAI_API_KEY)
+stock_analysis = StockAnalysis(OPENAI_API_KEY)
+portfolio_generator = PortfolioGenerator(OPENAI_API_KEY)
 lesson_plans = LessonPlans()
 
 # Inizializza i moduli per la gestione delle immagini
@@ -269,3 +274,52 @@ def recommend_best_option(options: dict, criteria: list, weights: dict = None):
     decision_matrix = decision_support.generate_decision_matrix(options, criteria, weights)
     best_option = decision_support.recommend_best_option(decision_matrix)
     return best_option
+
+@app.post("/business_tools/analyze_stock_or_index")
+async def analyze_stock_or_index(
+    stock_name: str = Query(..., description="Name of the stock or index"),
+    period: str = Query(..., description="Analysis period (e.g., 1 month, 1 year)"),
+    additional_context: str = Query("", description="Additional details or context")
+):
+    try:
+        # Genera l'analisi usando la funzione appropriata
+        analysis = stock_analysis.analyze_stock_or_index(stock_name, period, additional_context)
+
+        # Definisci il percorso del file nella directory "reports"
+        directory = "reports"
+        file_name = f"{stock_name}_analysis.docx"
+        file_path = os.path.join(directory, file_name)
+
+        # Assicurati che la directory esista
+        os.makedirs(directory, exist_ok=True)
+
+        # Genera il file Word
+        stock_analysis.generate_word_report(analysis, file_path)
+
+        # Restituisci l'analisi e un link per scaricare il file
+        return {
+            "analysis": analysis,
+            "download_link": f"/download/{file_name}"
+        }
+    
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post("/business_tools/generate_portfolio")
+async def generate_portfolio(
+    budget: float = Query(..., description="Investment budget"),
+    goals: str = Query(..., description="Investment goals (e.g., growth, stability)"),
+    timeline: str = Query(..., description="Investment timeline (e.g., 5 years)"),
+    preferences: str = Query("", description="Optional preferences for the portfolio")
+):
+    portfolio = portfolio_generator.generate_portfolio(budget, goals, timeline, preferences)
+    file_path = portfolio_generator.generate_word_report(portfolio, "portfolio_report.docx")
+    return {"portfolio": portfolio, "download_link": f"/download/{os.path.basename(file_path)}"}
+
+@app.get("/download/{file_name}")
+async def download_file(file_name: str):
+    file_path = os.path.join("reports", file_name)
+    if not os.path.exists(file_path):
+        return {"error": "File not found"}
+    return FileResponse(file_path, media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", filename=file_name)
